@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: bingo
     description: TDf Bingo shared demo-game operations
+  - name: admin
+    description: Telegram-verified TDf Bingo administrator operations
 paths:
   /healthz:
     get:
@@ -147,7 +149,208 @@ paths:
             text/event-stream:
               schema:
                 type: string
+  /admin/auth:
+    post:
+      operationId: authenticateBingoAdmin
+      tags: [admin]
+      summary: Verify Telegram Mini App identity and create an admin session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminAuthInput"
+      responses:
+        "200":
+          description: Verified administrator session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSessionResponse"
+        "401":
+          description: Telegram data is invalid or the account is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Required server configuration is missing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/session:
+    get:
+      operationId: getBingoAdminSession
+      tags: [admin]
+      summary: Check the current authenticated admin session
+      security:
+        - AdminSessionCookie: []
+      responses:
+        "200":
+          description: Authenticated administrator session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSessionResponse"
+        "401":
+          description: Missing, expired, or invalid admin session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/logout:
+    post:
+      operationId: logoutBingoAdmin
+      tags: [admin]
+      summary: End the current admin session
+      security:
+        - AdminSessionCookie: []
+      responses:
+        "200":
+          description: Admin session ended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLogoutResponse"
+        "401":
+          description: Missing, expired, or invalid admin session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/overview:
+    get:
+      operationId: getBingoAdminOverview
+      tags: [admin]
+      summary: Get verified-admin view of current demo game data
+      security:
+        - AdminSessionCookie: []
+      responses:
+        "200":
+          description: Current game state; no player or wallet records are synthesized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOverviewResponse"
+        "401":
+          description: Missing, expired, or invalid admin session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/cards:
+    get:
+      operationId: getBingoAdminCards
+      tags: [admin]
+      summary: List card numbers and their current reservation status
+      security:
+        - AdminSessionCookie: []
+      responses:
+        "200":
+          description: Current reservation status for card numbers 1 through 400
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCardManagementResponse"
+        "401":
+          description: Missing, expired, or invalid admin session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/cards/{cardNumber}:
+    delete:
+      operationId: releaseBingoAdminCard
+      tags: [admin]
+      summary: Release a reserved card before a round starts
+      security:
+        - AdminSessionCookie: []
+      parameters:
+        - name: cardNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 400
+      responses:
+        "200":
+          description: Updated card reservation status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCardManagementResponse"
+        "401":
+          description: Missing, expired, or invalid admin session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Card is not reserved or the round has already started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/game/start:
+    post:
+      operationId: startBingoAdminGame
+      tags: [admin]
+      summary: Start the shared demo round as an administrator
+      security:
+        - AdminSessionCookie: []
+      responses:
+        "200":
+          description: Started shared demo round
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BingoGameState"
+        "401":
+          description: Missing, expired, or invalid admin session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: No cards are reserved or the round cannot be started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/game/reset:
+    post:
+      operationId: resetBingoAdminGame
+      tags: [admin]
+      summary: Reset a completed shared demo round
+      security:
+        - AdminSessionCookie: []
+      responses:
+        "200":
+          description: Reset shared demo game state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BingoGameState"
+        "401":
+          description: Missing, expired, or invalid admin session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: An active round cannot be reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
+  securitySchemes:
+    AdminSessionCookie:
+      type: apiKey
+      in: cookie
+      name: tdf_admin_session
   schemas:
     HealthStatus:
       type: object
@@ -292,6 +495,73 @@ components:
           maxLength: 64
       required:
         - sessionId
+    AdminAuthInput:
+      type: object
+      properties:
+        initData:
+          type: string
+          minLength: 1
+          maxLength: 8192
+      required:
+        - initData
+    AdminSessionResponse:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+          const: true
+        expiresAt:
+          type: string
+          format: date-time
+      required:
+        - authenticated
+        - expiresAt
+    AdminLogoutResponse:
+      type: object
+      properties:
+        loggedOut:
+          type: boolean
+          const: true
+      required:
+        - loggedOut
+    AdminOverviewResponse:
+      type: object
+      properties:
+        game:
+          $ref: "#/components/schemas/BingoGameState"
+      required:
+        - game
+    AdminCardRecord:
+      type: object
+      properties:
+        cardNumber:
+          type: integer
+          minimum: 1
+          maximum: 400
+        status:
+          type: string
+          enum: [available, reserved]
+      required:
+        - cardNumber
+        - status
+    AdminCardManagementResponse:
+      type: object
+      properties:
+        gameStatus:
+          type: string
+          enum: [waiting, calling, complete]
+        canModify:
+          type: boolean
+        cards:
+          type: array
+          minItems: 400
+          maxItems: 400
+          items:
+            $ref: "#/components/schemas/AdminCardRecord"
+      required:
+        - gameStatus
+        - canModify
+        - cards
     ErrorResponse:
       type: object
       properties:

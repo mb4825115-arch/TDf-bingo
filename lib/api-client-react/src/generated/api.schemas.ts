@@ -108,6 +108,64 @@ export interface BingoActionInput {
   sessionId: string;
 }
 
+export interface AdminAuthInput {
+  /**
+     * @minLength 1
+     * @maxLength 8192
+     */
+  initData: string;
+}
+
+export interface AdminSessionResponse {
+  authenticated: true;
+  expiresAt: string;
+}
+
+export const AdminLogoutResponseValue = {
+  loggedOut: true,
+} as const;
+export type AdminLogoutResponse = typeof AdminLogoutResponseValue;
+
+export interface AdminOverviewResponse {
+  game: BingoGameState;
+}
+
+export type AdminCardRecordStatus = typeof AdminCardRecordStatus[keyof typeof AdminCardRecordStatus];
+
+
+export const AdminCardRecordStatus = {
+  available: 'available',
+  reserved: 'reserved',
+} as const;
+
+export interface AdminCardRecord {
+  /**
+     * @minimum 1
+     * @maximum 400
+     */
+  cardNumber: number;
+  status: AdminCardRecordStatus;
+}
+
+export type AdminCardManagementResponseGameStatus = typeof AdminCardManagementResponseGameStatus[keyof typeof AdminCardManagementResponseGameStatus];
+
+
+export const AdminCardManagementResponseGameStatus = {
+  waiting: 'waiting',
+  calling: 'calling',
+  complete: 'complete',
+} as const;
+
+export interface AdminCardManagementResponse {
+  gameStatus: AdminCardManagementResponseGameStatus;
+  canModify: boolean;
+  /**
+     * @minItems 400
+     * @maxItems 400
+     */
+  cards: AdminCardRecord[];
+}
+
 export interface ErrorResponse {
   error: string;
 }

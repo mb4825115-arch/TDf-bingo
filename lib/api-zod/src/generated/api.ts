@@ -377,3 +377,273 @@ export const SubscribeBingoEventsResponse = zod.object({
 })
 
 
+/**
+ * @summary Verify Telegram Mini App identity and create an admin session
+ */
+export const authenticateBingoAdminBodyInitDataMax = 8192;
+
+
+
+export const AuthenticateBingoAdminBody = zod.object({
+  "initData": zod.string().min(1).max(authenticateBingoAdminBodyInitDataMax)
+})
+
+export const AuthenticateBingoAdminResponse = zod.object({
+  "authenticated": zod.literal(true),
+  "expiresAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Check the current authenticated admin session
+ */
+export const GetBingoAdminSessionResponse = zod.object({
+  "authenticated": zod.literal(true),
+  "expiresAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary End the current admin session
+ */
+export const LogoutBingoAdminResponse = zod.object({
+  "loggedOut": zod.literal(true)
+})
+
+
+/**
+ * @summary Get verified-admin view of current demo game data
+ */
+export const getBingoAdminOverviewResponseGameSelectedCardCountMin = 0;
+export const getBingoAdminOverviewResponseGameSelectedCardCountMax = 400;
+
+export const getBingoAdminOverviewResponseGameDisplayedPoolBirrMin = 0;
+
+export const getBingoAdminOverviewResponseGameJackpotBirrMin = 0;
+
+export const getBingoAdminOverviewResponseGameDerashBirrMin = 0;
+
+export const getBingoAdminOverviewResponseGameReservedCardNumbersItemMax = 400;
+
+export const getBingoAdminOverviewResponseGameMyCardNumbersItemMax = 400;
+
+export const getBingoAdminOverviewResponseGameMyCardNumbersMax = 2;
+
+export const getBingoAdminOverviewResponseGameMyCardsItemCardNumberMax = 400;
+
+export const getBingoAdminOverviewResponseGameMyCardsItemNumbersItemMin = 0;
+export const getBingoAdminOverviewResponseGameMyCardsItemNumbersItemMax = 75;
+
+export const getBingoAdminOverviewResponseGameMyCardsItemNumbersMin = 25;
+export const getBingoAdminOverviewResponseGameMyCardsItemNumbersMax = 25;
+
+export const getBingoAdminOverviewResponseGameMyCardsMax = 2;
+
+export const getBingoAdminOverviewResponseGameCalledNumbersItemMax = 75;
+
+export const getBingoAdminOverviewResponseGameCalledNumbersMax = 75;
+
+export const getBingoAdminOverviewResponseGameCurrentNumberMax = 75;
+
+export const getBingoAdminOverviewResponseGameWinnerCardNumbersItemMax = 400;
+
+
+
+export const GetBingoAdminOverviewResponse = zod.object({
+  "game": zod.object({
+  "status": zod.enum(['waiting', 'calling', 'complete']),
+  "demo": zod.literal(true),
+  "entryFeeBirr": zod.literal(20),
+  "jackpotPercent": zod.literal(80),
+  "derashPercent": zod.literal(20),
+  "selectedCardCount": zod.number().int().min(getBingoAdminOverviewResponseGameSelectedCardCountMin).max(getBingoAdminOverviewResponseGameSelectedCardCountMax),
+  "displayedPoolBirr": zod.number().int().min(getBingoAdminOverviewResponseGameDisplayedPoolBirrMin),
+  "jackpotBirr": zod.number().int().min(getBingoAdminOverviewResponseGameJackpotBirrMin),
+  "derashBirr": zod.number().int().min(getBingoAdminOverviewResponseGameDerashBirrMin),
+  "reservedCardNumbers": zod.array(zod.number().int().min(1).max(getBingoAdminOverviewResponseGameReservedCardNumbersItemMax)),
+  "myCardNumbers": zod.array(zod.number().int().min(1).max(getBingoAdminOverviewResponseGameMyCardNumbersItemMax)).max(getBingoAdminOverviewResponseGameMyCardNumbersMax),
+  "myCards": zod.array(zod.object({
+  "cardNumber": zod.number().int().min(1).max(getBingoAdminOverviewResponseGameMyCardsItemCardNumberMax),
+  "numbers": zod.array(zod.number().int().min(getBingoAdminOverviewResponseGameMyCardsItemNumbersItemMin).max(getBingoAdminOverviewResponseGameMyCardsItemNumbersItemMax)).min(getBingoAdminOverviewResponseGameMyCardsItemNumbersMin).max(getBingoAdminOverviewResponseGameMyCardsItemNumbersMax)
+})).max(getBingoAdminOverviewResponseGameMyCardsMax),
+  "calledNumbers": zod.array(zod.number().int().min(1).max(getBingoAdminOverviewResponseGameCalledNumbersItemMax)).max(getBingoAdminOverviewResponseGameCalledNumbersMax),
+  "currentNumber": zod.number().int().min(1).max(getBingoAdminOverviewResponseGameCurrentNumberMax).nullable(),
+  "winnerCardNumbers": zod.array(zod.number().int().min(1).max(getBingoAdminOverviewResponseGameWinnerCardNumbersItemMax)),
+  "drawIntervalSeconds": zod.literal(4),
+  "notice": zod.string()
+})
+})
+
+
+/**
+ * @summary List card numbers and their current reservation status
+ */
+export const getBingoAdminCardsResponseCardsItemCardNumberMax = 400;
+
+export const getBingoAdminCardsResponseCardsMin = 400;
+export const getBingoAdminCardsResponseCardsMax = 400;
+
+
+
+export const GetBingoAdminCardsResponse = zod.object({
+  "gameStatus": zod.enum(['waiting', 'calling', 'complete']),
+  "canModify": zod.boolean(),
+  "cards": zod.array(zod.object({
+  "cardNumber": zod.number().int().min(1).max(getBingoAdminCardsResponseCardsItemCardNumberMax),
+  "status": zod.enum(['available', 'reserved'])
+})).min(getBingoAdminCardsResponseCardsMin).max(getBingoAdminCardsResponseCardsMax)
+})
+
+
+/**
+ * @summary Release a reserved card before a round starts
+ */
+export const releaseBingoAdminCardPathCardNumberMax = 400;
+
+
+
+export const ReleaseBingoAdminCardParams = zod.object({
+  "cardNumber": zod.coerce.number().int().min(1).max(releaseBingoAdminCardPathCardNumberMax)
+})
+
+export const releaseBingoAdminCardResponseCardsItemCardNumberMax = 400;
+
+export const releaseBingoAdminCardResponseCardsMin = 400;
+export const releaseBingoAdminCardResponseCardsMax = 400;
+
+
+
+export const ReleaseBingoAdminCardResponse = zod.object({
+  "gameStatus": zod.enum(['waiting', 'calling', 'complete']),
+  "canModify": zod.boolean(),
+  "cards": zod.array(zod.object({
+  "cardNumber": zod.number().int().min(1).max(releaseBingoAdminCardResponseCardsItemCardNumberMax),
+  "status": zod.enum(['available', 'reserved'])
+})).min(releaseBingoAdminCardResponseCardsMin).max(releaseBingoAdminCardResponseCardsMax)
+})
+
+
+/**
+ * @summary Start the shared demo round as an administrator
+ */
+export const startBingoAdminGameResponseSelectedCardCountMin = 0;
+export const startBingoAdminGameResponseSelectedCardCountMax = 400;
+
+export const startBingoAdminGameResponseDisplayedPoolBirrMin = 0;
+
+export const startBingoAdminGameResponseJackpotBirrMin = 0;
+
+export const startBingoAdminGameResponseDerashBirrMin = 0;
+
+export const startBingoAdminGameResponseReservedCardNumbersItemMax = 400;
+
+export const startBingoAdminGameResponseMyCardNumbersItemMax = 400;
+
+export const startBingoAdminGameResponseMyCardNumbersMax = 2;
+
+export const startBingoAdminGameResponseMyCardsItemCardNumberMax = 400;
+
+export const startBingoAdminGameResponseMyCardsItemNumbersItemMin = 0;
+export const startBingoAdminGameResponseMyCardsItemNumbersItemMax = 75;
+
+export const startBingoAdminGameResponseMyCardsItemNumbersMin = 25;
+export const startBingoAdminGameResponseMyCardsItemNumbersMax = 25;
+
+export const startBingoAdminGameResponseMyCardsMax = 2;
+
+export const startBingoAdminGameResponseCalledNumbersItemMax = 75;
+
+export const startBingoAdminGameResponseCalledNumbersMax = 75;
+
+export const startBingoAdminGameResponseCurrentNumberMax = 75;
+
+export const startBingoAdminGameResponseWinnerCardNumbersItemMax = 400;
+
+
+
+export const StartBingoAdminGameResponse = zod.object({
+  "status": zod.enum(['waiting', 'calling', 'complete']),
+  "demo": zod.literal(true),
+  "entryFeeBirr": zod.literal(20),
+  "jackpotPercent": zod.literal(80),
+  "derashPercent": zod.literal(20),
+  "selectedCardCount": zod.number().int().min(startBingoAdminGameResponseSelectedCardCountMin).max(startBingoAdminGameResponseSelectedCardCountMax),
+  "displayedPoolBirr": zod.number().int().min(startBingoAdminGameResponseDisplayedPoolBirrMin),
+  "jackpotBirr": zod.number().int().min(startBingoAdminGameResponseJackpotBirrMin),
+  "derashBirr": zod.number().int().min(startBingoAdminGameResponseDerashBirrMin),
+  "reservedCardNumbers": zod.array(zod.number().int().min(1).max(startBingoAdminGameResponseReservedCardNumbersItemMax)),
+  "myCardNumbers": zod.array(zod.number().int().min(1).max(startBingoAdminGameResponseMyCardNumbersItemMax)).max(startBingoAdminGameResponseMyCardNumbersMax),
+  "myCards": zod.array(zod.object({
+  "cardNumber": zod.number().int().min(1).max(startBingoAdminGameResponseMyCardsItemCardNumberMax),
+  "numbers": zod.array(zod.number().int().min(startBingoAdminGameResponseMyCardsItemNumbersItemMin).max(startBingoAdminGameResponseMyCardsItemNumbersItemMax)).min(startBingoAdminGameResponseMyCardsItemNumbersMin).max(startBingoAdminGameResponseMyCardsItemNumbersMax)
+})).max(startBingoAdminGameResponseMyCardsMax),
+  "calledNumbers": zod.array(zod.number().int().min(1).max(startBingoAdminGameResponseCalledNumbersItemMax)).max(startBingoAdminGameResponseCalledNumbersMax),
+  "currentNumber": zod.number().int().min(1).max(startBingoAdminGameResponseCurrentNumberMax).nullable(),
+  "winnerCardNumbers": zod.array(zod.number().int().min(1).max(startBingoAdminGameResponseWinnerCardNumbersItemMax)),
+  "drawIntervalSeconds": zod.literal(4),
+  "notice": zod.string()
+})
+
+
+/**
+ * @summary Reset a completed shared demo round
+ */
+export const resetBingoAdminGameResponseSelectedCardCountMin = 0;
+export const resetBingoAdminGameResponseSelectedCardCountMax = 400;
+
+export const resetBingoAdminGameResponseDisplayedPoolBirrMin = 0;
+
+export const resetBingoAdminGameResponseJackpotBirrMin = 0;
+
+export const resetBingoAdminGameResponseDerashBirrMin = 0;
+
+export const resetBingoAdminGameResponseReservedCardNumbersItemMax = 400;
+
+export const resetBingoAdminGameResponseMyCardNumbersItemMax = 400;
+
+export const resetBingoAdminGameResponseMyCardNumbersMax = 2;
+
+export const resetBingoAdminGameResponseMyCardsItemCardNumberMax = 400;
+
+export const resetBingoAdminGameResponseMyCardsItemNumbersItemMin = 0;
+export const resetBingoAdminGameResponseMyCardsItemNumbersItemMax = 75;
+
+export const resetBingoAdminGameResponseMyCardsItemNumbersMin = 25;
+export const resetBingoAdminGameResponseMyCardsItemNumbersMax = 25;
+
+export const resetBingoAdminGameResponseMyCardsMax = 2;
+
+export const resetBingoAdminGameResponseCalledNumbersItemMax = 75;
+
+export const resetBingoAdminGameResponseCalledNumbersMax = 75;
+
+export const resetBingoAdminGameResponseCurrentNumberMax = 75;
+
+export const resetBingoAdminGameResponseWinnerCardNumbersItemMax = 400;
+
+
+
+export const ResetBingoAdminGameResponse = zod.object({
+  "status": zod.enum(['waiting', 'calling', 'complete']),
+  "demo": zod.literal(true),
+  "entryFeeBirr": zod.literal(20),
+  "jackpotPercent": zod.literal(80),
+  "derashPercent": zod.literal(20),
+  "selectedCardCount": zod.number().int().min(resetBingoAdminGameResponseSelectedCardCountMin).max(resetBingoAdminGameResponseSelectedCardCountMax),
+  "displayedPoolBirr": zod.number().int().min(resetBingoAdminGameResponseDisplayedPoolBirrMin),
+  "jackpotBirr": zod.number().int().min(resetBingoAdminGameResponseJackpotBirrMin),
+  "derashBirr": zod.number().int().min(resetBingoAdminGameResponseDerashBirrMin),
+  "reservedCardNumbers": zod.array(zod.number().int().min(1).max(resetBingoAdminGameResponseReservedCardNumbersItemMax)),
+  "myCardNumbers": zod.array(zod.number().int().min(1).max(resetBingoAdminGameResponseMyCardNumbersItemMax)).max(resetBingoAdminGameResponseMyCardNumbersMax),
+  "myCards": zod.array(zod.object({
+  "cardNumber": zod.number().int().min(1).max(resetBingoAdminGameResponseMyCardsItemCardNumberMax),
+  "numbers": zod.array(zod.number().int().min(resetBingoAdminGameResponseMyCardsItemNumbersItemMin).max(resetBingoAdminGameResponseMyCardsItemNumbersItemMax)).min(resetBingoAdminGameResponseMyCardsItemNumbersMin).max(resetBingoAdminGameResponseMyCardsItemNumbersMax)
+})).max(resetBingoAdminGameResponseMyCardsMax),
+  "calledNumbers": zod.array(zod.number().int().min(1).max(resetBingoAdminGameResponseCalledNumbersItemMax)).max(resetBingoAdminGameResponseCalledNumbersMax),
+  "currentNumber": zod.number().int().min(1).max(resetBingoAdminGameResponseCurrentNumberMax).nullable(),
+  "winnerCardNumbers": zod.array(zod.number().int().min(1).max(resetBingoAdminGameResponseWinnerCardNumbersItemMax)),
+  "drawIntervalSeconds": zod.literal(4),
+  "notice": zod.string()
+})
+
+

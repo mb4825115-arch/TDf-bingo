@@ -20,6 +20,11 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdminAuthInput,
+  AdminCardManagementResponse,
+  AdminLogoutResponse,
+  AdminOverviewResponse,
+  AdminSessionResponse,
   BingoActionInput,
   BingoCardSelectionInput,
   BingoGameState,
@@ -565,4 +570,619 @@ export function useSubscribeBingoEvents<TData = Awaited<ReturnType<typeof subscr
 
 
 
+
+export const getAuthenticateBingoAdminUrl = () => {
+
+
+
+
+  return `/api/admin/auth`
+}
+
+/**
+ * @summary Verify Telegram Mini App identity and create an admin session
+ */
+export const authenticateBingoAdmin = async (adminAuthInput: AdminAuthInput, options?: Parameters<typeof customFetch>[1]): Promise<AdminSessionResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<AdminSessionResponse>(getAuthenticateBingoAdminUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(adminAuthInput)
+  }
+);}
+
+
+
+
+
+export const getAuthenticateBingoAdminMutationKey = () => ['authenticateBingoAdmin'] as const;
+
+export const getAuthenticateBingoAdminMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticateBingoAdmin>>, TError,AuthenticateBingoAdminMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof authenticateBingoAdmin>>, TError,AuthenticateBingoAdminMutationVariables, TContext> => {
+
+const mutationKey = getAuthenticateBingoAdminMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authenticateBingoAdmin>>, AuthenticateBingoAdminMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  authenticateBingoAdmin(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthenticateBingoAdminMutationResult = NonNullable<Awaited<ReturnType<typeof authenticateBingoAdmin>>>
+    export type AuthenticateBingoAdminMutationBody = BodyType<AdminAuthInput>
+    export type AuthenticateBingoAdminMutationError = ErrorType<ErrorResponse>
+    export type AuthenticateBingoAdminMutationVariables = {data: BodyType<AdminAuthInput>}
+
+    /**
+ * @summary Verify Telegram Mini App identity and create an admin session
+ */
+export const useAuthenticateBingoAdmin = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticateBingoAdmin>>, TError,AuthenticateBingoAdminMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof authenticateBingoAdmin>>,
+        TError,
+        AuthenticateBingoAdminMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAuthenticateBingoAdminMutationOptions(options));
+    }
+
+export const getGetBingoAdminSessionUrl = () => {
+
+
+
+
+  return `/api/admin/session`
+}
+
+/**
+ * @summary Check the current authenticated admin session
+ */
+export const getBingoAdminSession = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminSessionResponse> => {
+
+  return customFetch<AdminSessionResponse>(getGetBingoAdminSessionUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetBingoAdminSessionQueryKey = () => {
+    return [
+    `/api/admin/session`
+    ] as const;
+    }
+
+
+export const getGetBingoAdminSessionQueryOptions = <TData = Awaited<ReturnType<typeof getBingoAdminSession>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBingoAdminSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBingoAdminSessionQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBingoAdminSession>>> = ({ signal }) => getBingoAdminSession({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBingoAdminSession>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetBingoAdminSessionQueryResult = NonNullable<Awaited<ReturnType<typeof getBingoAdminSession>>>
+export type GetBingoAdminSessionQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Check the current authenticated admin session
+ */
+
+export function useGetBingoAdminSession<TData = Awaited<ReturnType<typeof getBingoAdminSession>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBingoAdminSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetBingoAdminSessionQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getLogoutBingoAdminUrl = () => {
+
+
+
+
+  return `/api/admin/logout`
+}
+
+/**
+ * @summary End the current admin session
+ */
+export const logoutBingoAdmin = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminLogoutResponse> => {
+
+  return customFetch<AdminLogoutResponse>(getLogoutBingoAdminUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getLogoutBingoAdminMutationKey = () => ['logoutBingoAdmin'] as const;
+
+export const getLogoutBingoAdminMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutBingoAdmin>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof logoutBingoAdmin>>, TError,void, TContext> => {
+
+const mutationKey = getLogoutBingoAdminMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logoutBingoAdmin>>, void> = () => {
+
+
+          return  logoutBingoAdmin(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LogoutBingoAdminMutationResult = NonNullable<Awaited<ReturnType<typeof logoutBingoAdmin>>>
+
+    export type LogoutBingoAdminMutationError = ErrorType<ErrorResponse>
+
+
+    /**
+ * @summary End the current admin session
+ */
+export const useLogoutBingoAdmin = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutBingoAdmin>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof logoutBingoAdmin>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getLogoutBingoAdminMutationOptions(options));
+    }
+
+export const getGetBingoAdminOverviewUrl = () => {
+
+
+
+
+  return `/api/admin/overview`
+}
+
+/**
+ * @summary Get verified-admin view of current demo game data
+ */
+export const getBingoAdminOverview = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminOverviewResponse> => {
+
+  return customFetch<AdminOverviewResponse>(getGetBingoAdminOverviewUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetBingoAdminOverviewQueryKey = () => {
+    return [
+    `/api/admin/overview`
+    ] as const;
+    }
+
+
+export const getGetBingoAdminOverviewQueryOptions = <TData = Awaited<ReturnType<typeof getBingoAdminOverview>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBingoAdminOverview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBingoAdminOverviewQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBingoAdminOverview>>> = ({ signal }) => getBingoAdminOverview({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBingoAdminOverview>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetBingoAdminOverviewQueryResult = NonNullable<Awaited<ReturnType<typeof getBingoAdminOverview>>>
+export type GetBingoAdminOverviewQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get verified-admin view of current demo game data
+ */
+
+export function useGetBingoAdminOverview<TData = Awaited<ReturnType<typeof getBingoAdminOverview>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBingoAdminOverview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetBingoAdminOverviewQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetBingoAdminCardsUrl = () => {
+
+
+
+
+  return `/api/admin/cards`
+}
+
+/**
+ * @summary List card numbers and their current reservation status
+ */
+export const getBingoAdminCards = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminCardManagementResponse> => {
+
+  return customFetch<AdminCardManagementResponse>(getGetBingoAdminCardsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetBingoAdminCardsQueryKey = () => {
+    return [
+    `/api/admin/cards`
+    ] as const;
+    }
+
+
+export const getGetBingoAdminCardsQueryOptions = <TData = Awaited<ReturnType<typeof getBingoAdminCards>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBingoAdminCards>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBingoAdminCardsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBingoAdminCards>>> = ({ signal }) => getBingoAdminCards({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBingoAdminCards>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetBingoAdminCardsQueryResult = NonNullable<Awaited<ReturnType<typeof getBingoAdminCards>>>
+export type GetBingoAdminCardsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List card numbers and their current reservation status
+ */
+
+export function useGetBingoAdminCards<TData = Awaited<ReturnType<typeof getBingoAdminCards>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBingoAdminCards>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetBingoAdminCardsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getReleaseBingoAdminCardUrl = (cardNumber: number,) => {
+
+
+
+
+  return `/api/admin/cards/${cardNumber}`
+}
+
+/**
+ * @summary Release a reserved card before a round starts
+ */
+export const releaseBingoAdminCard = async (cardNumber: number, options?: Parameters<typeof customFetch>[1]): Promise<AdminCardManagementResponse> => {
+
+  return customFetch<AdminCardManagementResponse>(getReleaseBingoAdminCardUrl(cardNumber),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getReleaseBingoAdminCardMutationKey = () => ['releaseBingoAdminCard'] as const;
+
+export const getReleaseBingoAdminCardMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof releaseBingoAdminCard>>, TError,ReleaseBingoAdminCardMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof releaseBingoAdminCard>>, TError,ReleaseBingoAdminCardMutationVariables, TContext> => {
+
+const mutationKey = getReleaseBingoAdminCardMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof releaseBingoAdminCard>>, ReleaseBingoAdminCardMutationVariables> = (props) => {
+          const {cardNumber} = props ?? {};
+
+          return  releaseBingoAdminCard(cardNumber,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReleaseBingoAdminCardMutationResult = NonNullable<Awaited<ReturnType<typeof releaseBingoAdminCard>>>
+
+    export type ReleaseBingoAdminCardMutationError = ErrorType<ErrorResponse>
+    export type ReleaseBingoAdminCardMutationVariables = {cardNumber: number}
+
+    /**
+ * @summary Release a reserved card before a round starts
+ */
+export const useReleaseBingoAdminCard = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof releaseBingoAdminCard>>, TError,ReleaseBingoAdminCardMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof releaseBingoAdminCard>>,
+        TError,
+        ReleaseBingoAdminCardMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReleaseBingoAdminCardMutationOptions(options));
+    }
+
+export const getStartBingoAdminGameUrl = () => {
+
+
+
+
+  return `/api/admin/game/start`
+}
+
+/**
+ * @summary Start the shared demo round as an administrator
+ */
+export const startBingoAdminGame = async ( options?: Parameters<typeof customFetch>[1]): Promise<BingoGameState> => {
+
+  return customFetch<BingoGameState>(getStartBingoAdminGameUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getStartBingoAdminGameMutationKey = () => ['startBingoAdminGame'] as const;
+
+export const getStartBingoAdminGameMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startBingoAdminGame>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof startBingoAdminGame>>, TError,void, TContext> => {
+
+const mutationKey = getStartBingoAdminGameMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startBingoAdminGame>>, void> = () => {
+
+
+          return  startBingoAdminGame(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StartBingoAdminGameMutationResult = NonNullable<Awaited<ReturnType<typeof startBingoAdminGame>>>
+
+    export type StartBingoAdminGameMutationError = ErrorType<ErrorResponse>
+
+
+    /**
+ * @summary Start the shared demo round as an administrator
+ */
+export const useStartBingoAdminGame = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startBingoAdminGame>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof startBingoAdminGame>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getStartBingoAdminGameMutationOptions(options));
+    }
+
+export const getResetBingoAdminGameUrl = () => {
+
+
+
+
+  return `/api/admin/game/reset`
+}
+
+/**
+ * @summary Reset a completed shared demo round
+ */
+export const resetBingoAdminGame = async ( options?: Parameters<typeof customFetch>[1]): Promise<BingoGameState> => {
+
+  return customFetch<BingoGameState>(getResetBingoAdminGameUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getResetBingoAdminGameMutationKey = () => ['resetBingoAdminGame'] as const;
+
+export const getResetBingoAdminGameMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetBingoAdminGame>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof resetBingoAdminGame>>, TError,void, TContext> => {
+
+const mutationKey = getResetBingoAdminGameMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resetBingoAdminGame>>, void> = () => {
+
+
+          return  resetBingoAdminGame(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResetBingoAdminGameMutationResult = NonNullable<Awaited<ReturnType<typeof resetBingoAdminGame>>>
+
+    export type ResetBingoAdminGameMutationError = ErrorType<ErrorResponse>
+
+
+    /**
+ * @summary Reset a completed shared demo round
+ */
+export const useResetBingoAdminGame = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetBingoAdminGame>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof resetBingoAdminGame>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getResetBingoAdminGameMutationOptions(options));
+    }
 
