@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "TDf Bingo"
+description = "A Telegram-connected Ethiopian 75-ball Bingo web app where players select up to two numbered cards, follow shared live calls, and see a demo-only jackpot and derash pool split."
+version = "1.0.0"
+id = "artifacts/tdf-bingo-web"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19073
+
+[services.development]
+run = "pnpm --filter @workspace/tdf-bingo-web run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/tdf-bingo-web", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/tdf-bingo-web/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19073"
+BASE_PATH = "/"

@@ -3,7 +3,13 @@
 import logging
 import os
 
-from telegram import BotCommand, KeyboardButton, ReplyKeyboardMarkup, Update
+from telegram import (
+    BotCommand,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+    Update,
+    WebAppInfo,
+)
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -18,23 +24,49 @@ DEPOSIT_BUTTON = "Deposit"
 WITHDRAW_BUTTON = "Withdraw"
 SUPPORT_BUTTON = "Support"
 
-MENU = ReplyKeyboardMarkup(
-    [
-        [KeyboardButton(PLAY_BUTTON)],
-        [KeyboardButton(BALANCE_BUTTON), KeyboardButton(DEPOSIT_BUTTON)],
-        [KeyboardButton(WITHDRAW_BUTTON), KeyboardButton(SUPPORT_BUTTON)],
-    ],
-    resize_keyboard=True,
-    is_persistent=True,
-    input_field_placeholder="Choose an option",
-)
-
 logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     level=logging.INFO,
 )
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger("tdf_bingo")
+
+
+def web_app_url() -> str:
+    configured_url = os.environ.get("TELEGRAM_WEBAPP_URL")
+    if configured_url:
+        url = configured_url.strip()
+    else:
+        domain = (
+            os.environ.get("REPLIT_DOMAINS", "").split(",", maxsplit=1)[0].strip()
+            or os.environ.get("REPLIT_DEV_DOMAIN", "").strip()
+        )
+        if not domain:
+            raise RuntimeError(
+                "Set TELEGRAM_WEBAPP_URL or run in Replit with a web domain configured."
+            )
+        url = domain if domain.startswith("https://") else f"https://{domain}"
+
+    if not url.startswith("https://"):
+        raise RuntimeError("Telegram Mini Apps require a secure HTTPS URL.")
+    return url
+
+
+def menu_keyboard(private_chat: bool) -> ReplyKeyboardMarkup:
+    play_button = KeyboardButton(
+        PLAY_BUTTON,
+        web_app=WebAppInfo(url=web_app_url()) if private_chat else None,
+    )
+    return ReplyKeyboardMarkup(
+        [
+            [play_button],
+            [KeyboardButton(BALANCE_BUTTON), KeyboardButton(DEPOSIT_BUTTON)],
+            [KeyboardButton(WITHDRAW_BUTTON), KeyboardButton(SUPPORT_BUTTON)],
+        ],
+        resize_keyboard=True,
+        is_persistent=True,
+        input_field_placeholder="Choose an option",
+    )
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -45,7 +77,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "Welcome to TDf Bingo!\n"
         "Play Ethiopian Bingo with a 20 Birr entry.\n\n"
         "Choose an option below to get started.",
-        reply_markup=MENU,
+        reply_markup=menu_keyboard(
+            update.effective_chat is not None
+            and update.effective_chat.type == "private"
+        ),
     )
 
 
@@ -55,7 +90,10 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     await update.effective_message.reply_text(
         "Use the menu buttons below to explore TDf Bingo.",
-        reply_markup=MENU,
+        reply_markup=menu_keyboard(
+            update.effective_chat is not None
+            and update.effective_chat.type == "private"
+        ),
     )
 
 
@@ -64,8 +102,12 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     await update.effective_message.reply_text(
-        "The 20 Birr game is not accepting entries yet. "
-        "No payment has been taken. Game and wallet services are not live."
+        "Tap the Play 20 Birr menu button to open card selection. "
+        "This is a demo only; no payment is taken.",
+        reply_markup=menu_keyboard(
+            update.effective_chat is not None
+            and update.effective_chat.type == "private"
+        ),
     )
 
 
@@ -111,7 +153,10 @@ async def unknown_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     await update.effective_message.reply_text(
         "Please choose one of the menu options below, or send /start to reopen the menu.",
-        reply_markup=MENU,
+        reply_markup=menu_keyboard(
+            update.effective_chat is not None
+            and update.effective_chat.type == "private"
+        ),
     )
 
 

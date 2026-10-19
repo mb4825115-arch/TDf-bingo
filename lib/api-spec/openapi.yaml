@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: bingo
+    description: TDf Bingo shared demo-game operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,127 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /bingo/state:
+    get:
+      operationId: getBingoState
+      tags: [bingo]
+      summary: Get the shared demo game state
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 64
+      responses:
+        "200":
+          description: Current shared game state and this session's selected cards
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BingoGameState"
+  /bingo/cards:
+    put:
+      operationId: selectBingoCards
+      tags: [bingo]
+      summary: Set this session's selected cards
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BingoCardSelectionInput"
+      responses:
+        "200":
+          description: Updated shared game state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BingoGameState"
+        "400":
+          description: Invalid session or card selection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Game has started or a selected card is already reserved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /bingo/game/start:
+    post:
+      operationId: startBingoGame
+      tags: [bingo]
+      summary: Start the shared demo round
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BingoActionInput"
+      responses:
+        "200":
+          description: Started or already-running shared demo game
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BingoGameState"
+        "400":
+          description: Session has not selected a card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /bingo/game/reset:
+    post:
+      operationId: resetBingoGame
+      tags: [bingo]
+      summary: Reset a completed demo round
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BingoActionInput"
+      responses:
+        "200":
+          description: Reset shared demo game state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BingoGameState"
+        "409":
+          description: An active round cannot be reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /bingo/events:
+    get:
+      operationId: subscribeBingoEvents
+      tags: [bingo]
+      summary: Subscribe to shared game updates
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 64
+      responses:
+        "200":
+          description: JSON state snapshot for reconnects, or event stream when requested by EventSource
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BingoGameState"
+            text/event-stream:
+              schema:
+                type: string
 components:
   schemas:
     HealthStatus:
@@ -33,4 +156,147 @@ components:
           type: string
       required:
         - status
+    BingoNumber:
+      type: integer
+      minimum: 1
+      maximum: 75
+    BingoCard:
+      type: object
+      properties:
+        cardNumber:
+          type: integer
+          minimum: 1
+          maximum: 400
+        numbers:
+          type: array
+          minItems: 25
+          maxItems: 25
+          items:
+            type: integer
+            minimum: 0
+            maximum: 75
+      required:
+        - cardNumber
+        - numbers
+    BingoGameState:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [waiting, calling, complete]
+        demo:
+          type: boolean
+          const: true
+        entryFeeBirr:
+          type: integer
+          const: 20
+        jackpotPercent:
+          type: integer
+          const: 80
+        derashPercent:
+          type: integer
+          const: 20
+        selectedCardCount:
+          type: integer
+          minimum: 0
+          maximum: 400
+        displayedPoolBirr:
+          type: integer
+          minimum: 0
+        jackpotBirr:
+          type: integer
+          minimum: 0
+        derashBirr:
+          type: integer
+          minimum: 0
+        reservedCardNumbers:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+            maximum: 400
+        myCardNumbers:
+          type: array
+          maxItems: 2
+          items:
+            type: integer
+            minimum: 1
+            maximum: 400
+        myCards:
+          type: array
+          maxItems: 2
+          items:
+            $ref: "#/components/schemas/BingoCard"
+        calledNumbers:
+          type: array
+          maxItems: 75
+          items:
+            $ref: "#/components/schemas/BingoNumber"
+        currentNumber:
+          type: ["integer", "null"]
+          minimum: 1
+          maximum: 75
+        winnerCardNumbers:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+            maximum: 400
+        drawIntervalSeconds:
+          type: integer
+          const: 4
+        notice:
+          type: string
+      required:
+        - status
+        - demo
+        - entryFeeBirr
+        - jackpotPercent
+        - derashPercent
+        - selectedCardCount
+        - displayedPoolBirr
+        - jackpotBirr
+        - derashBirr
+        - reservedCardNumbers
+        - myCardNumbers
+        - myCards
+        - calledNumbers
+        - currentNumber
+        - winnerCardNumbers
+        - drawIntervalSeconds
+        - notice
+    BingoCardSelectionInput:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          minLength: 8
+          maxLength: 64
+        cardNumbers:
+          type: array
+          uniqueItems: true
+          maxItems: 2
+          items:
+            type: integer
+            minimum: 1
+            maximum: 400
+      required:
+        - sessionId
+        - cardNumbers
+    BingoActionInput:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          minLength: 8
+          maxLength: 64
+      required:
+        - sessionId
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
 
