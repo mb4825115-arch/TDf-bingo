@@ -1,0 +1,1 @@
+- [TDf Bingo product facts](tdf-bingo-product.md) — preserve the Ethiopian Bingo identity and requested 20 Birr play option.
